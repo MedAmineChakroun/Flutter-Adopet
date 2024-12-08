@@ -1,7 +1,7 @@
 import 'package:adopet/data/Owner.dart';
 
 class Dog {
-  final int id;
+  final String? id;
   final String name;
   final double age;
   final String gender;
@@ -13,7 +13,7 @@ class Dog {
   final Owner owner;
 
   Dog({
-    required this.id,
+    this.id,
     required this.name,
     required this.age,
     required this.gender,
@@ -27,7 +27,7 @@ class Dog {
 
   factory Dog.fromJson(Map<String, dynamic> json) {
     return Dog(
-      id: json['id'],
+      id: json['_id'],
       name: json['name'],
       age: json['age'],
       gender: json['gender'],
@@ -38,5 +38,24 @@ class Dog {
       description: json['description'],
       owner: Owner.fromJson(json['owner']),
     );
+  }
+
+  Map<String, dynamic> toJson({bool forUpdate = false}) {
+    final data = <String, dynamic>{
+      'name': name,
+      'age': age,
+      'gender': gender,
+      'color': color,
+      'weight': weight,
+      'location': location,
+      'imageUrl': imageUrl,
+      'description': description,
+      'owner': owner.toJson(),
+    };
+    //ken chya3mel update me ybadalch _id yo93od houwa bidou eli 5tarou
+    if (!forUpdate) {
+      data['_id'] = id;
+    }
+    return data;
   }
 }

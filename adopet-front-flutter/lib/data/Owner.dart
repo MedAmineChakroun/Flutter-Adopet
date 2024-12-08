@@ -7,9 +7,9 @@ class Owner {
 
   factory Owner.fromJson(Map<String, dynamic> json) {
     return Owner(
-      name: json['name'],
-      bio: json['bio'],
-      imageUrl: json['imageUrl'],
-    );
+        name: json['name'], bio: json['bio'], imageUrl: json['imageUrl']);
+  }
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'bio': bio, "imageUrl": imageUrl};
   }
 }

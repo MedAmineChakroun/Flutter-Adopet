@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-
-import 'data/Dog.dart'; // Make sure you have a Dog model
+import 'data/Dog.dart';
 
 class DogDetailsScreen extends StatefulWidget {
-  final int dogId;
+  final String dogId;
 
   DogDetailsScreen({required this.dogId});
 
@@ -28,7 +27,7 @@ class _DogDetailsScreenState extends State<DogDetailsScreen> {
   Future<void> fetchDogDetails() async {
     try {
       final response = await http
-          .get(Uri.parse('http://192.168.1.15:3000/dogs/${widget.dogId}'));
+          .get(Uri.parse('http://localhost3000/dogs/${widget.dogId}'));
 
       if (response.statusCode == 200) {
         setState(() {

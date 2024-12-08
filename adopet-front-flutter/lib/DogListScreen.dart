@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'data/Dog.dart';
 import 'package:go_router/go_router.dart';
+import 'data/Dog.dart';
+import 'AddEditScreen.dart';
 
 class DogListScreen extends StatefulWidget {
   @override
@@ -22,9 +23,7 @@ class _DogListScreenState extends State<DogListScreen> {
 
   Future<void> fetchDogs() async {
     try {
-      final response = await http.get(
-          // bech tastit 3al teliphoun 7atit ip adresse mta3 lwifi
-          Uri.parse('http://192.168.1.15:3000/dogs'));
+      final response = await http.get(Uri.parse('http://localhost:3000/dogs'));
 
       if (response.statusCode == 200) {
         final List<dynamic> dogJson = jsonDecode(response.body);
@@ -45,17 +44,120 @@ class _DogListScreenState extends State<DogListScreen> {
     }
   }
 
+  void onDelete(Dog dog) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content: Text('Are you sure you want to delete ${dog.name}?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () async {
+                final response = await http.delete(
+                  Uri.parse('http://localhost:3000/dogs/${dog.id}'),
+                );
+
+                if (response.statusCode == 200) {
+                  setState(() {
+                    dogList.remove(dog);
+                  });
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('${dog.name} has been deleted.')),
+                  );
+                } else {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to delete ${dog.name}.')),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void onEdit(Dog dog) async {
+    final updatedDog = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEditScreen(dog: dog),
+      ),
+    );
+
+    if (updatedDog != null && updatedDog is Dog) {
+      setState(() {
+        final index = dogList.indexWhere((d) => d.id == updatedDog.id);
+        if (index != -1) {
+          dogList[index] = updatedDog;
+        }
+      });
+
+      //ya3mel refresh
+      fetchDogs();
+    }
+  }
+
+  void onAdd() async {
+    final newDog = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddEditScreen(),
+      ),
+    );
+
+    if (newDog != null && newDog is Dog) {
+      setState(() {
+        dogList.add(newDog);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Adopt a Pet'),
+        actions: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 20.0),
+            child: TextButton(
+              onPressed: onAdd,
+              child: Text(
+                'Add +',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.green),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
               ? Center(child: Text(errorMessage))
               : ListView.builder(
+                  padding: EdgeInsets.fromLTRB(20, 50, 20, 100),
                   itemCount: dogList.length,
                   itemBuilder: (context, index) {
                     final dog = dogList[index];
@@ -63,9 +165,6 @@ class _DogListScreenState extends State<DogListScreen> {
                       margin:
                           EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                       elevation: 5,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
                       child: ListTile(
                         contentPadding:
                             EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -75,7 +174,7 @@ class _DogListScreenState extends State<DogListScreen> {
                             dog.imageUrl,
                             width: 70,
                             height: 70,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                           ),
                         ),
                         title: Text(
@@ -104,7 +203,24 @@ class _DogListScreenState extends State<DogListScreen> {
                                     ? const Color.fromARGB(255, 178, 22, 74)
                                     : const Color.fromARGB(255, 22, 123, 205),
                               ),
-                            )
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                onEdit(dog);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                onDelete(dog);
+                              },
+                            ),
                           ],
                         ),
                         onTap: () {
