@@ -19,14 +19,13 @@ class SignInScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Add an image at the top
               Center(
                 child: Image.asset(
-                  'assets/welcomeDog.png', // Path to your image
+                  'assets/welcomeDog.png',
                   height: 200,
                 ),
               ),
-              SizedBox(height: 32), // Space between the image and the form
+              SizedBox(height: 32),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(

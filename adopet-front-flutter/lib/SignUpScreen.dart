@@ -53,7 +53,6 @@ class SignUpScreen extends StatelessWidget {
             SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
-                // Call the sign-up method
                 await _signUp(context);
               },
               child: Text('Sign Up'),

@@ -43,8 +43,6 @@ class _DogFormState extends State<DogForm> {
     gender = widget.dog?.gender ?? gender;
   }
 
-  //gender par defaut 7titou male
-  //imageUrl 7atit DefaultDof.png , par defaut w tet 7at fel input awel me t7ot el formulaire
   @override
   void dispose() {
     nameController.dispose();
